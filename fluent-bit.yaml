@@ -1,0 +1,100 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-app: fluent-bit
+    kubernetes.io/cluster-service: "true"
+    version: v1
+  name: fluent-bit-test
+  namespace: mvnr-paas
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: fluent-bit
+      kubernetes.io/cluster-service: "true"
+      version: v1
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /api/v1/metrics/prometheus
+        prometheus.io/port: "2020"
+        prometheus.io/scrape: "true"
+      creationTimestamp: null
+      labels:
+        k8s-app: fluent-bit
+        kubernetes.io/cluster-service: "true"
+        version: v1
+    spec:
+      containers:
+      - env:
+        - name: REMOTE_HOST
+          value: fluentd-aggregator.mvnr-paas.svc.cluster.local
+        - name: REMOTE_PORT
+          value: "24224"
+        - name: FLUENT_ELASTICSEARCH_HOST
+          value: elasticsearch.mvnr-paas.svc.cluster.local
+        - name: FLUENT_ELASTICSEARCH_PORT
+          value: "9200"
+        image: 10.1.34.126:5000/fluent-bit:1.2.2-debug
+        imagePullPolicy: Always
+        name: fluent-bit
+        ports:
+        - containerPort: 2020
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "1"
+            memory: 300Mi
+          requests:
+            cpu: "1"
+            memory: 300Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/log
+          name: varlog
+        - mountPath: /var/lib/docker/containers
+          name: varlibdockercontainers
+          readOnly: true
+        - mountPath: /data/logs
+          name: applog
+        - mountPath: /fluent-bit/etc/
+          name: fluent-bit-config
+        - mountPath: /data
+          name: data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: fluent-bit
+      serviceAccountName: fluent-bit
+      terminationGracePeriodSeconds: 10
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      volumes:
+      - hostPath:
+          path: /var/log
+          type: ""
+        name: varlog
+      - hostPath:
+          path: /var/lib/docker/containers
+          type: ""
+        name: varlibdockercontainers
+      - hostPath:
+          path: /data/logs
+          type: ""
+        name: applog
+      - configMap:
+          defaultMode: 420
+          name: fluent-bit-config
+        name: fluent-bit-config
+      - hostPath:
+           path: /data
+           type: Directory
+        name: data
+  templateGeneration: 30
+  updateStrategy:
+    type: OnDelete
