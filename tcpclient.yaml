@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tcp-client-new
+  labels:
+    app: tcp-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tcp-client
+  template:
+    metadata:
+      labels:
+        app: tcp-client
+    spec:
+      containers:
+      - name: tcpclient
+        image: 10.1.34.126:5000/tcpclient:2.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+        command: ["/bin/sh", "-c", "sleep 10; tcpclient "]
+        volumeMounts:
+        - mountPath: /root/app/
+          name: config
+      volumes:
+        - name: config
+          configMap:
+            name: tcp-client-config
+            items:
+            - key: app.config
+              path: app.config
