@@ -36,7 +36,7 @@ spec:
           value: elasticsearch.mvnr-paas.svc.cluster.local
         - name: FLUENT_ELASTICSEARCH_PORT
           value: "9200"
-        image: 10.1.34.126:5000/fluent-bit:1.2.2-debug
+        image: fluent-bit:1.0.4-debug
         imagePullPolicy: Always
         name: fluent-bit
         ports:
