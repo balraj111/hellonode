@@ -17,12 +17,12 @@ data:
         HTTP_Server   On
         HTTP_Listen   0.0.0.0
         HTTP_Port     2020
-    @INCLUDE input-kubernetes.conf
-    @INCLUDE input-kubefmt-applog.conf
+    #@INCLUDE input-kubernetes.conf
+    #@INCLUDE input-kubefmt-applog.conf
     #@INCLUDE input-kubefmt-mmx.conf
     @INCLUDE filter-kubernetes.conf
     #@INCLUDE output-fluentd-aggregator.conf
-    #@INCLUDE input-json-stream.conf
+    @INCLUDE input-json-stream.conf
     @INCLUDE output-elasticsearch.conf
   input-kubefmt-applog.conf: |
     [INPUT]
